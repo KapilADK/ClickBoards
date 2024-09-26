@@ -1,10 +1,12 @@
 #ifndef ADC24CLICK_H
 #define ADC24CLICK_H
 
-#define DUMMY_HIGH 0xFFFF
-#define DUMMY_LOW  0x0000
+#include <stdint.h>
 
+#define DUMMY_HIGH 0xFFFF   // required to pull the DIN line high when powering up AD7490
+#define DUMMY_LOW  0x0000    // required when reading the data out the DOUT line
 
+// default config in manual mode without setting channel identifier bits
 /*
 *This config is used to insert the channel bits in the right order to read input from a selected channel. This config has:
     -11th bit set to 1: loads the remaining bits to the control register
@@ -13,32 +15,24 @@
     -5th and 4th bit set to 1: normal power mode
     -3rd bit set to 0: sequence function not used
     -2nd bit set to 1: the DOUT line is weakly driven to the ADD3 channel address bit of the ensuing conversion
-    -1st bit set to 1: the analog input range extends from 0 V to REFIN
+    -1st bit set to 0: the analog input range extends from 0 V to 2*REFIN (+2.5V to -2.5V)
     -0th bit set to 0: the output coding for the part is twos complement
 */
-#define ADC24_MANUAL_CONFG 0x0836
+#define ADC24_DEF_MANUAL_MODE   0x0834
 
-/**
- * This config is used to insert the channel bits upto which the sequence mode should sample the data. 
- * All the bits except 10th and 3rd are same as in ADC_24_MANUAL_CONFG. The 10th and 3rd bits are set to 1 to start the ADC in sequence mode.
- */
-#define ADC24_SEQUENCE_CONFG 0x0C3E
+#define ADC24_MAX_VALUE         0x0800
 
-#define ADC24_ADC_RESOLUTION 0x0FFF
-#define ADC24_CTRL_REG_RESOLUTION 0x0FFF
-#define ADC24_VREF_2V5 2.5f
-#define ADC24_HIGHEST_VAL_TWOS_COMP 2048.0f
+#define ADC24_VOLTAGE_RANGE     2.5f
 
-#define MAX_CHANNELS 15
-
-
+// config to start sequence mode
+#define ADC24_DEF_SEQUENCE_MODE 0x0C3C
 
 void config_adc24_ctrl_reg(int spi_fd, uint16_t regCfg);
 void init_adc24(int spi_fd);
-void read_adc24_data(int spi_fd, uint16_t *data);
-int convert_data_to_mV(uint16_t data);
+int16_t read_adc24_data(int spi_fd);
+int convert_raw16_to_mV(int16_t raw_data);
 int get_voltage_adc24(int spi_fd, int ch);
-void sample_sequence_adc24(int spi_fd,  int stop_ch, int channels, int *voltages);
+void sequence_mode_adc24(int spi_fd, int stop_ch, int *voltages_mV, bool verbose);
 
 
 #endif
