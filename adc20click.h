@@ -1,10 +1,15 @@
 #ifndef ADC20CLICK_H
 #define ADC20CLICK_H
 
+#include <stdint.h>
+
+// command to write register
 #define ADC20_CMD_REG_WRITE  0x08
+
+// command to read register
 #define ADC20_CMD_REG_READ   0x10
 
-
+// dummy data to send when reading register
 #define DUMMY 0x00 
 
 // registers list of ADC20Click
@@ -34,5 +39,22 @@
 // config for not appending channel identifier in output_format
 #define ADC20_CH_ID_NOT_APPEND              0x00 
 
+#define ADC20_MAX_VALUE                     0x0FFF
+
+#define ADC20_VOLTAGE_RANGE                 3.3f
+
+// config to start sequence mode
+#define ADC20_SEQUENCE_MODE                 0x11   
+
+// config to stop sequence mode
+#define ADC20_STOP_SEQUENCE_MODE            0x00
+
+void write_register(int spi_fd, uint8_t regAddr, uint8_t regCfg);
+uint8_t read_register (int spi_fd, uint8_t regAddr);
+void init_adc20(int spi_fd);
+uint16_t read_adc20_data(int spi_fd);
+int convert_raw16_to_mV(uint16_t raw_data);
+int get_voltage_adc20(int spi_fd, int ch, int average);
+void sample_sequence_mode_adc20(int spi_fd, int stop_ch, int average, int *voltages_mV, bool verbose);
 
 #endif
